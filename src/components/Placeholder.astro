@@ -1,0 +1,19 @@
+---
+// Stand-in for a product photo until real pictures are supplied.
+// To swap in a photo: put it in src/assets/ and replace this component with
+// <Image src={photo} alt="..." /> from astro:assets.
+import Icon from './Icon.astro';
+
+interface Props {
+  icon: Parameters<typeof Icon>[0]['name'];
+  label: string;
+  tone?: 1 | 2 | 3 | 4;
+  class?: string;
+}
+
+const { icon, label, tone = 1, class: className } = Astro.props;
+---
+
+<div class:list={['ph', `ph--${tone}`, className]} role="img" aria-label={label}>
+  <Icon name={icon} size={72} class="ph__icon" />
+</div>
