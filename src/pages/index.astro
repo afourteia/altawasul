@@ -1,5 +1,4 @@
 ---
-import '@fontsource/amiri/400.css';
 import '@fontsource/amiri/700.css';
 import '@fontsource/ibm-plex-sans-arabic/400.css';
 import '@fontsource/ibm-plex-sans-arabic/500.css';
@@ -113,7 +112,7 @@ const nav = [
           </ul>
         </nav>
 
-        <a class="btn btn--small header__call" href={contact.phoneHref}>
+        <a class="btn btn--small header__call" href={contact.phoneHref} aria-label="اتصل بنا">
           <Icon name="phone" size={18} />
           <span>اتصل بنا</span>
         </a>
@@ -162,7 +161,15 @@ const nav = [
 
           <div class="hero__art hero__in" style="--d: 1.5">
             <div class="arch">
-              <Image src={logoFull} alt={`شعار ${name}`} width={560} densities={[1, 2]} class="arch__logo" loading="eager" />
+              <Image
+                src={logoFull}
+                alt={`شعار ${name}`}
+                width={380}
+                widths={[240, 380, 560, 760]}
+                sizes="(max-width: 860px) min(calc(64vw - 61px), 225px), 380px"
+                class="arch__logo"
+                loading="eager"
+              />
             </div>
           </div>
         </div>
@@ -306,24 +313,40 @@ const nav = [
       const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
       const nav = document.querySelector<HTMLElement>('[data-nav]');
 
+      const isOpen = () => toggle?.getAttribute('aria-expanded') === 'true';
       const setMenu = (open: boolean) => {
         toggle?.setAttribute('aria-expanded', String(open));
         header?.classList.toggle('is-open', open);
       };
-      toggle?.addEventListener('click', () => setMenu(toggle.getAttribute('aria-expanded') !== 'true'));
+      // The nav comes before its toggle in the DOM, so move focus into it when it opens.
+      toggle?.addEventListener('click', () => {
+        const open = !isOpen();
+        setMenu(open);
+        if (open) nav?.querySelector('a')?.focus();
+      });
       nav?.addEventListener('click', (e) => {
         if ((e.target as HTMLElement).closest('a')) setMenu(false);
       });
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') setMenu(false);
+        if (e.key !== 'Escape' || !isOpen()) return;
+        setMenu(false);
+        toggle?.focus();
+      });
+      header?.addEventListener('focusout', (e) => {
+        if (isOpen() && !header.contains(e.relatedTarget as Node | null)) setMenu(false);
       });
 
-      const onScroll = () => {
-        header?.classList.toggle('is-scrolled', window.scrollY > 8);
-        document.body.classList.toggle('show-float', window.scrollY > window.innerHeight * 0.7);
-      };
+      const onScroll = () => header?.classList.toggle('is-scrolled', window.scrollY > 8);
       onScroll();
       window.addEventListener('scroll', onScroll, { passive: true });
+
+      // Show the floating WhatsApp button only after the hero (and its own WhatsApp button) is gone.
+      const hero = document.querySelector('.hero');
+      if (hero) {
+        new IntersectionObserver(([entry]) => {
+          document.body.classList.toggle('show-float', !entry.isIntersecting && entry.boundingClientRect.top < 0);
+        }).observe(hero);
+      }
 
       const io = new IntersectionObserver(
         (entries) => {

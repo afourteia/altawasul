@@ -79,7 +79,7 @@ p {
 }
 
 :focus-visible {
-  outline: 3px solid var(--olive);
+  outline: 3px solid var(--olive-text);
   outline-offset: 3px;
   border-radius: 6px;
 }
@@ -765,6 +765,12 @@ p {
 
 .contact__list li > div {
   display: grid;
+  min-width: 0;
+}
+
+.contact__list a,
+.contact__list li > div > span {
+  overflow-wrap: anywhere;
 }
 
 .contact__label {
@@ -897,7 +903,7 @@ p {
     font-size: 1.2rem;
   }
 
-  .menu-toggle {
+  .js .menu-toggle {
     display: grid;
   }
 
@@ -905,7 +911,25 @@ p {
     margin-inline-start: auto;
   }
 
-  .nav {
+  /* Without JS the menu can't open, so show the links as a wrapped row instead */
+  html:not(.js) .header__inner {
+    flex-wrap: wrap;
+    row-gap: 0.25rem;
+    padding-block: 0.5rem;
+  }
+
+  html:not(.js) .nav {
+    order: 3;
+    flex-basis: 100%;
+    margin: 0;
+  }
+
+  html:not(.js) .nav ul {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .js .nav {
     position: absolute;
     inset: 100% 0 auto;
     margin: 0;
@@ -922,17 +946,22 @@ p {
       visibility 0.25s;
   }
 
-  .is-open .nav {
+  /* Visibility flips instantly on open so focus can move into the menu */
+  .js .is-open .nav {
     opacity: 1;
     visibility: visible;
     transform: none;
+    transition:
+      opacity 0.25s var(--ease),
+      transform 0.25s var(--ease),
+      visibility 0s;
   }
 
-  .nav ul {
+  .js .nav ul {
     flex-direction: column;
   }
 
-  .nav a {
+  .js .nav a {
     padding: 0.85rem 0.25rem;
     border-bottom: 1px solid var(--line);
     font-size: 1.05rem;
@@ -942,10 +971,11 @@ p {
     display: none;
   }
 
+  /* minmax(0, 1fr) lets columns shrink below their content's min width */
   .hero__grid,
   .about__grid,
   .contact__card {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .hero__art {
@@ -1004,6 +1034,25 @@ p {
 
   .card__body h3 {
     font-size: 1.3rem;
+  }
+
+  .contact__card {
+    padding: 1.75rem 1rem;
+  }
+
+  .contact__list li {
+    gap: 0.7rem;
+    padding: 0.8rem 0.75rem;
+  }
+
+  .contact__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .contact__list a,
+  .contact__list li > div > span:last-child:not(.contact__label) {
+    font-size: 0.98rem;
   }
 
   .footer__inner {
